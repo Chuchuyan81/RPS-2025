@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Отладка Supabase</title>
+    <style>
+        body { font-family: monospace; background: #1a1a1a; color: #0f0; padding: 20px; }
+        .test { background: #2a2a2a; border: 1px solid #444; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { color: #0f0; } .error { color: #f00; } .warning { color: #ff0; } .info { color: #0af; }
+        button { background: #333; color: #0f0; border: 1px solid #0f0; padding: 10px 20px; margin: 5px; cursor: pointer; border-radius: 3px; }
+        button:hover { background: #0f0; color: #000; }
+        .log { background: #000; padding: 10px; margin: 10px 0; border-radius: 3px; max-height: 300px; overflow-y: auto; font-size: 12px; }
+        .code { background: #333; padding: 10px; margin: 10px 0; border-radius: 3px; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Диагностика Supabase подключения</h1>
+    
+    <div class="test">
+        <h3>📋 Доступные команды для консоли:</h3>
+        <div class="code">
+            window.supabaseClient - инициализированный клиент<br>
+            window.testSupabase() - быстрый тест подключения<br>
+            window.createTestRoom() - создание тестовой комнаты<br>
+            window.debugInfo() - информация о состоянии
+        </div>
+    </div>
+
+    <div class="test">
+        <h3>1. Проверка библиотеки</h3>
+        <div id="lib-status">Проверяем...</div>
+        <button onclick="checkLib()">🔍 Проверить</button>
+    </div>
+
+    <div class="test">
+        <h3>2. Инициализация клиента</h3>
+        <div id="client-status">Ожидание...</div>
+        <button onclick="initClient()">🔌 Инициализировать</button>
+    </div>
+
+    <div class="test">
+        <h3>3. Тест подключения</h3>
+        <div id="conn-status">Ожидание...</div>
+        <button onclick="testConn()">🌐 Тестировать</button>
+    </div>
+
+    <div class="test">
+        <h3>4. Проверка таблицы</h3>
+        <div id="table-status">Ожидание...</div>
+        <button onclick="checkTable()">📊 Проверить</button>
+    </div>
+
+    <div class="test">
+        <h3>5. Тест создания комнаты</h3>
+        <div id="room-status">Ожидание...</div>
+        <button onclick="testRoom()">🏠 Создать</button>
+    </div>
+
+    <div class="test">
+        <h3>📝 Логи</h3>
+        <button onclick="clearLogs()">🗑️ Очистить</button>
+        <div class="log" id="logs"></div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        const supabaseUrl = "https://kdbbyqsdmucjvsatbiog.supabase.co";
+        const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtkYmJ5cXNkbXVjanZzYXRiaW9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MzQxNzcsImV4cCI6MjA2NjAxMDE3N30.v6wR9s1zCyYL-xN2Rohoi35LJ-f1uA1Y5KPPjQoXhLU";
+        
+        let supabaseClient = null;
+
+        function log(msg, type = 'info') {
+            const logs = document.getElementById('logs');
+            const time = new Date().toLocaleTimeString();
+            const cls = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info';
+            logs.innerHTML += `<div class="${cls}">[${time}] ${msg}</div>`;
+            logs.scrollTop = logs.scrollHeight;
+            console.log(`[${time}] ${msg}`);
+        }
+
+        function setStatus(id, msg, type = 'info') {
+            const el = document.getElementById(id);
+            const cls = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info';
+            el.innerHTML = `<span class="${cls}">${msg}</span>`;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        function checkLib() {
+            log('Проверяем библиотеку Supabase...');
+            if (typeof window.supabase === 'undefined') {
+                log('❌ Библиотека Supabase не загружена!', 'error');
+                setStatus('lib-status', '❌ Не загружена', 'error');
+                return false;
+            }
+            if (typeof window.supabase.createClient !== 'function') {
+                log('❌ createClient недоступна!', 'error');
+                setStatus('lib-status', '❌ createClient недоступна', 'error');
+                return false;
+            }
+            log('✅ Библиотека загружена', 'success');
+            setStatus('lib-status', '✅ Загружена', 'success');
+            return true;
+        }
+
+        function initClient() {
+            log('Инициализируем клиент...');
+            if (!checkLib()) return false;
+
+            try {
+                supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
+                    auth: { autoRefreshToken: true, persistSession: false },
+                    realtime: { params: { eventsPerSecond: 10 } }
+                });
+
+                // Делаем доступным глобально
+                window.supabaseClient = supabaseClient;
+
+                log('✅ Клиент инициализирован', 'success');
+                setStatus('client-status', '✅ Инициализирован', 'success');
+                
+                // Создаем глобальные хелперы
+                window.testSupabase = async () => {
+                    if (!window.supabaseClient) {
+                        console.error('❌ Клиент не инициализирован');
+                        return { error: 'Client not initialized' };
+                    }
+                    try {
+                        const { data, error } = await window.supabaseClient.from('games').select('count').limit(1);
+                        console.log('✅ Тест результат:', { data, error });
+                        return { data, error };
+                    } catch (e) {
+                        console.error('❌ Ошибка теста:', e);
+                        return { error: e };
+                    }
+                };
+
+                window.createTestRoom = async () => {
+                    if (!window.supabaseClient) {
+                        console.error('❌ Клиент не инициализирован');
+                        return { error: 'Client not initialized' };
+                    }
+                    const roomId = 'TEST_' + Math.random().toString(36).substr(2, 6);
+                    try {
+                        const { data, error } = await window.supabaseClient
+                            .from('games')
+                            .insert([{ room_id: roomId, player1_id: 'test_player', status: 'waiting_player2' }])
+                            .select().single();
+                        console.log('✅ Комната создана:', { data, error });
+                        return { data, error };
+                    } catch (e) {
+                        console.error('❌ Ошибка создания:', e);
+                        return { error: e };
+                    }
+                };
+
+                window.debugInfo = () => {
+                    const info = {
+                        hasClient: !!window.supabaseClient,
+                        url: supabaseUrl,
+                        keyLength: supabaseKey.length
+                    };
+                    console.log('ℹ️ Debug info:', info);
+                    return info;
+                };
+
+                log('✅ Глобальные функции созданы', 'success');
+                return true;
+            } catch (error) {
+                log(`❌ Ошибка инициализации: ${error.message}`, 'error');
+                setStatus('client-status', `❌ ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testConn() {
+            log('Тестируем подключение...');
+            if (!supabaseClient) {
+                if (!initClient()) return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient.from('games').select('count').limit(1);
+                if (error) {
+                    log(`❌ Ошибка: ${error.message}`, 'error');
+                    setStatus('conn-status', `❌ ${error.message}`, 'error');
+                    return false;
+                }
+                log('✅ Подключение успешно', 'success');
+                setStatus('conn-status', '✅ Подключение ОК', 'success');
+                return true;
+            } catch (error) {
+                log(`❌ Исключение: ${error.message}`, 'error');
+                setStatus('conn-status', `❌ ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function checkTable() {
+            log('Проверяем таблицу games...');
+            if (!supabaseClient) {
+                log('⚠️ Клиент не инициализирован', 'warning');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient.from('games').select('*').limit(1);
+                if (error) {
+                    if (error.code === '42P01') {
+                        log('❌ Таблица не существует!', 'error');
+                        setStatus('table-status', '❌ Таблица не найдена', 'error');
+                    } else {
+                        log(`❌ Ошибка: ${error.message}`, 'error');
+                        setStatus('table-status', `❌ ${error.message}`, 'error');
+                    }
+                    return false;
+                }
+                log('✅ Таблица существует', 'success');
+                setStatus('table-status', '✅ Таблица найдена', 'success');
+                return true;
+            } catch (error) {
+                log(`❌ Исключение: ${error.message}`, 'error');
+                setStatus('table-status', `❌ ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testRoom() {
+            log('Создаем тестовую комнату...');
+            if (!supabaseClient) {
+                log('⚠️ Клиент не инициализирован', 'warning');
+                return;
+            }
+
+            const testRoomId = 'DEBUG_' + Math.random().toString(36).substr(2, 6);
+            try {
+                const { data, error } = await supabaseClient
+                    .from('games')
+                    .insert([{
+                        room_id: testRoomId,
+                        player1_id: 'debug_player',
+                        status: 'waiting_player2'
+                    }])
+                    .select().single();
+
+                if (error) {
+                    log(`❌ Ошибка: ${error.message}`, 'error');
+                    setStatus('room-status', `❌ ${error.message}`, 'error');
+                    return false;
+                }
+
+                log(`✅ Комната ${data.room_id} создана`, 'success');
+                setStatus('room-status', `✅ ${data.room_id} создана`, 'success');
+
+                // Удаляем через 10 секунд
+                setTimeout(async () => {
+                    try {
+                        await supabaseClient.from('games').delete().eq('room_id', testRoomId);
+                        log(`🗑️ Комната ${testRoomId} удалена`, 'info');
+                    } catch (e) {
+                        log(`⚠️ Не удалось удалить: ${e.message}`, 'warning');
+                    }
+                }, 10000);
+
+                return true;
+            } catch (error) {
+                log(`❌ Исключение: ${error.message}`, 'error');
+                setStatus('room-status', `❌ ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        // Автозапуск
+        window.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Запуск диагностики...');
+            setTimeout(() => {
+                checkLib();
+                setTimeout(() => {
+                    if (checkLib()) initClient();
+                }, 500);
+            }, 100);
+        });
+    </script>
+</body>
+</html> 
