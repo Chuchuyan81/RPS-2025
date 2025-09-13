@@ -4,10 +4,11 @@
  * Поддерживает расширенные возможности кэширования, Background Sync, Push уведомления
  */
 
-const CACHE_NAME = 'rps-game-v2.0.0';
-const STATIC_CACHE = 'rps-static-v2.0.0';
-const DYNAMIC_CACHE = 'rps-dynamic-v2.0.0';
-const IMAGE_CACHE = 'rps-images-v2.0.0';
+const CACHE_NAME = 'rps-game-v3.0.0';
+const STATIC_CACHE = 'rps-static-v3.0.0';
+const DYNAMIC_CACHE = 'rps-dynamic-v3.0.0';
+const IMAGE_CACHE = 'rps-images-v3.0.0';
+const FONTS_CACHE = 'rps-fonts-v3.0.0';
 
 const STATIC_URLS = [
   '/',
@@ -26,6 +27,13 @@ const DYNAMIC_URLS = [
   'https://unpkg.com/@supabase/supabase-js@2'
 ];
 
+const FONT_URLS = [
+  // Google Fonts
+  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap',
+  'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2',
+  'https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2'
+];
+
 // Стратегии кэширования
 const CACHE_STRATEGIES = {
   CACHE_FIRST: 'cache-first',
@@ -37,7 +45,7 @@ const CACHE_STRATEGIES = {
 
 // Установка Service Worker
 self.addEventListener('install', (event) => {
-  console.log('🔧 Service Worker v2.0.0: Установка');
+  console.log('🔧 Service Worker v3.0.0: Установка');
   
   event.waitUntil(
     Promise.all([
@@ -51,6 +59,12 @@ self.addEventListener('install', (event) => {
       caches.open(DYNAMIC_CACHE).then(cache => {
         console.log('🌐 Кэширование динамических ресурсов');
         return cache.addAll(DYNAMIC_URLS);
+      }),
+      
+      // Предварительное кэширование шрифтов
+      caches.open(FONTS_CACHE).then(cache => {
+        console.log('🔤 Кэширование шрифтов');
+        return cache.addAll(FONT_URLS);
       })
     ])
     .then(() => {
@@ -66,7 +80,7 @@ self.addEventListener('install', (event) => {
 
 // Активация Service Worker
 self.addEventListener('activate', (event) => {
-  console.log('🚀 Service Worker v2.0.0: Активация');
+  console.log('🚀 Service Worker v3.0.0: Активация');
   
   event.waitUntil(
     Promise.all([
@@ -76,7 +90,8 @@ self.addEventListener('activate', (event) => {
           cacheNames.map(cacheName => {
             if (cacheName !== STATIC_CACHE && 
                 cacheName !== DYNAMIC_CACHE && 
-                cacheName !== IMAGE_CACHE) {
+                cacheName !== IMAGE_CACHE &&
+                cacheName !== FONTS_CACHE) {
               console.log('🗑️ Удаляем старый кэш:', cacheName);
               return caches.delete(cacheName);
             }
@@ -88,7 +103,7 @@ self.addEventListener('activate', (event) => {
       self.clients.claim()
     ])
     .then(() => {
-      console.log('✅ Service Worker v2.0.0 активирован');
+      console.log('✅ Service Worker v3.0.0 активирован');
     })
   );
 });
@@ -121,6 +136,11 @@ function getStrategyForRequest(request) {
   
   // Статические ресурсы - cache first
   if (STATIC_URLS.includes(url.pathname)) {
+    return CACHE_STRATEGIES.CACHE_FIRST;
+  }
+  
+  // Шрифты - cache first для быстрой загрузки
+  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
     return CACHE_STRATEGIES.CACHE_FIRST;
   }
   
@@ -173,7 +193,15 @@ async function cacheFirst(request) {
   const networkResponse = await fetch(request);
   
   if (networkResponse.ok) {
-    const cache = await caches.open(STATIC_CACHE);
+    // Определяем правильный кэш для ресурса
+    let cacheName = STATIC_CACHE;
+    const url = new URL(request.url);
+    
+    if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+      cacheName = FONTS_CACHE;
+    }
+    
+    const cache = await caches.open(cacheName);
     cache.put(request, networkResponse.clone());
   }
   
@@ -252,10 +280,38 @@ async function handleOffline(request) {
     }
   }
   
-  // Для изображений показываем placeholder
+  // Для изображений показываем неоновый placeholder
   if (request.destination === 'image') {
     return new Response(
-      '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="#f0f0f0"/><text x="100" y="100" text-anchor="middle" fill="#999">Офлайн</text></svg>',
+      `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+        <defs>
+          <linearGradient id="offlineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#a855f7;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#ec4899;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge> 
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <rect width="200" height="200" fill="url(#offlineGradient)" opacity="0.1"/>
+        <circle cx="50" cy="50" r="3" fill="#a855f7" opacity="0.6">
+          <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="150" cy="80" r="2" fill="#ec4899" opacity="0.8">
+          <animate attributeName="opacity" values="0.8;0.4;0.8" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="100" cy="150" r="4" fill="#f59e0b" opacity="0.7">
+          <animate attributeName="opacity" values="0.7;1;0.7" dur="2.5s" repeatCount="indefinite"/>
+        </circle>
+        <text x="100" y="100" text-anchor="middle" fill="#a855f7" font-family="Inter, sans-serif" font-size="14" filter="url(#glow)">
+          🌐 Офлайн
+        </text>
+      </svg>`,
       { headers: { 'Content-Type': 'image/svg+xml' } }
     );
   }
@@ -325,28 +381,30 @@ self.addEventListener('push', (event) => {
   console.log('📱 Push уведомление получено');
   
   let notificationData = {
-    title: 'Камень, Ножницы, Бумага',
-    body: 'Новое уведомление от игры!',
+    title: '🎮 Камень, Ножницы, Бумага',
+    body: '✨ Новое уведомление от игры!',
     icon: '/icons/icon-192x192.png',
     badge: '/icons/icon-72x72.png',
     tag: 'rps-notification',
     renotify: true,
     requireInteraction: false,
+    vibrate: [200, 100, 200],
     actions: [
       {
         action: 'open',
-        title: 'Открыть игру',
+        title: '🚀 Открыть игру',
         icon: '/icons/icon-96x96.png'
       },
       {
         action: 'close',
-        title: 'Закрыть',
+        title: '❌ Закрыть',
         icon: '/icons/icon-96x96.png'
       }
     ],
     data: {
       dateOfArrival: Date.now(),
-      primaryKey: 'rps-notification'
+      primaryKey: 'rps-notification',
+      url: '/'
     }
   };
   
@@ -373,7 +431,18 @@ self.addEventListener('notificationclick', (event) => {
   
   if (event.action === 'open' || !event.action) {
     event.waitUntil(
-      clients.openWindow('/')
+      clients.matchAll({ type: 'window' }).then(clientList => {
+        // Если приложение уже открыто, фокусируемся на нем
+        for (const client of clientList) {
+          if (client.url === '/' && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        // Иначе открываем новое окно
+        if (clients.openWindow) {
+          return clients.openWindow('/');
+        }
+      })
     );
   }
 });

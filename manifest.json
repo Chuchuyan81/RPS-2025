@@ -6,12 +6,24 @@
   "id": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
-  "background_color": "#1a1a2e",
-  "theme_color": "#16213e",
+  "background_color": "#0f0f23",
+  "theme_color": "#a855f7",
   "orientation": "portrait",
   "scope": "/",
   "lang": "ru",
   "dir": "ltr",
+  "i18n": {
+    "ru": {
+      "name": "Камень, Ножницы, Бумага",
+      "short_name": "RPS",
+      "description": "Многопользовательская игра Камень, Ножницы, Бумага в реальном времени с поддержкой комнат"
+    },
+    "en": {
+      "name": "Rock, Paper, Scissors",
+      "short_name": "RPS", 
+      "description": "Real-time multiplayer Rock, Paper, Scissors game with room support"
+    }
+  },
   "categories": ["games", "entertainment", "social"],
   "icons": [
     {
@@ -88,13 +100,13 @@
   ],
   "shortcuts": [
     {
-      "name": "Создать комнату",
+      "name": "🚀 Создать комнату",
       "short_name": "Создать",
       "description": "Быстро создать новую игровую комнату",
       "url": "/?action=create",
       "icons": [
         {
-          "src": "icons/shortcut-create.png",
+          "src": "icons/icon-96x96.png",
           "sizes": "96x96",
           "type": "image/png",
           "purpose": "any"
@@ -102,13 +114,13 @@
       ]
     },
     {
-      "name": "Присоединиться к игре",
+      "name": "🎯 Присоединиться",
       "short_name": "Войти",
       "description": "Присоединиться к существующей комнате",
       "url": "/?action=join",
       "icons": [
         {
-          "src": "icons/shortcut-join.png",
+          "src": "icons/icon-96x96.png",
           "sizes": "96x96",
           "type": "image/png",
           "purpose": "any"
@@ -116,13 +128,13 @@
       ]
     },
     {
-      "name": "Правила игры",
-      "short_name": "Правила",
-      "description": "Посмотреть правила игры",
-      "url": "/?action=rules",
+      "name": "🤖 Играть с ботом",
+      "short_name": "Бот",
+      "description": "Быстро начать игру с ИИ-ботом",
+      "url": "/?action=bot",
       "icons": [
         {
-          "src": "icons/shortcut-rules.png",
+          "src": "icons/icon-96x96.png",
           "sizes": "96x96",
           "type": "image/png",
           "purpose": "any"
@@ -167,8 +179,15 @@
   "features": [
     "Cross Platform",
     "Fast",
-    "Simple",
+    "Simple", 
     "Offline Support",
-    "Real-time Multiplayer"
+    "Real-time Multiplayer",
+    "Haptic Feedback",
+    "Achievements",
+    "Statistics",
+    "Multi-language",
+    "Modern UI",
+    "Glassmorphism",
+    "Neon Effects"
   ]
 } 

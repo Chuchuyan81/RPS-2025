@@ -1,3 +1,33 @@
+/* Импорт шрифтов */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap');
+
+/* CSS переменные для новой цветовой палитры */
+:root {
+  /* Основные цвета */
+  --electric-purple: #a855f7;
+  --neon-pink: #ec4899;
+  --neon-orange: #f59e0b;
+  --bright-green: #10b981;
+  --neon-yellow: #f59e0b;
+  --soft-red: #ef4444;
+  
+  /* Нейтральные цвета */
+  --white: #ffffff;
+  --dark: #0f172a;
+  --light-gray: #f1f5f9;
+  --dark-gray: #334155;
+  
+  /* Градиенты */
+  --primary-gradient: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f59e0b 100%);
+  --glass-bg: rgba(255, 255, 255, 0.15);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  
+  /* Тени и эффекты */
+  --neon-glow: 0 0 20px rgba(168, 85, 247, 0.5);
+  --glass-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  --button-shadow: 0 8px 32px rgba(168, 85, 247, 0.3);
+}
+
 /* Сброс и базовые стили */
 * {
   margin: 0;
@@ -6,13 +36,22 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ff9a9e 100%);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--primary-gradient);
+  background-size: 400% 400%;
+  animation: gradientShift 10s ease infinite;
   min-height: 100vh;
-  color: #333;
-  line-height: 1.6;
+  color: var(--white);
+  line-height: 1.5;
   position: relative;
   overflow-x: hidden;
+}
+
+/* Анимация смены градиента */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* Добавляем анимированный фон */
@@ -50,45 +89,58 @@ body::before {
   overflow: hidden;
 }
 
-/* Заголовок */
+/* Заголовок с новым дизайном */
 h1 {
-  color: white;
-  font-size: 2.2rem;
-  margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 800;
+  color: var(--white);
   text-align: center;
-  font-weight: 700;
-  letter-spacing: 1px;
-  animation: titleGlow 3s ease-in-out infinite alternate;
+  margin-bottom: 2rem;
+  text-shadow: var(--neon-glow);
+  letter-spacing: -0.02em;
+  animation: neonPulse 2s ease-in-out infinite alternate;
+  position: relative;
 }
 
-@keyframes titleGlow {
-  from { text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-  to { text-shadow: 2px 2px 4px rgba(0,0,0,0.3), 0 0 20px rgba(255,255,255,0.3); }
+@keyframes neonPulse {
+  from { 
+    text-shadow: var(--neon-glow);
+    transform: scale(1);
+  }
+  to { 
+    text-shadow: 0 0 30px rgba(168, 85, 247, 0.8), 0 0 40px rgba(236, 72, 153, 0.6);
+    transform: scale(1.02);
+  }
 }
 
-/* Игровой контейнер */
+/* Игровой контейнер с glassmorphism */
 .game-container {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
-  padding: 1.5rem;
-  box-shadow: 
-    0 25px 50px rgba(0,0,0,0.15),
-    0 0 0 1px rgba(255,255,255,0.1);
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: var(--glass-shadow);
+  border: 2px solid var(--glass-border);
   width: 100%;
   max-width: 500px;
   text-align: center;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.2);
   position: relative;
-  overflow: visible; /* Изменено с hidden на visible для отображения всего контента */
+  overflow: visible;
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* Изменено с space-between на flex-start */
+  justify-content: flex-start;
   max-height: calc(100vh - 120px);
-  min-height: 0; /* Позволяет flex элементам сжиматься */
-  gap: 1rem; /* Добавляем равномерные отступы между элементами */
+  min-height: 0;
+  gap: 1.5rem;
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Анимация плавания */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
 }
 
 /* Добавляем блики на контейнер */
@@ -119,51 +171,72 @@ h1 {
   display: none;
 }
 
+/* Поле ввода комнаты с новым дизайном */
 #room {
   width: 100%;
-  padding: 15px 20px;
-  font-size: 18px;
-  border: 3px solid #e1e5e9;
-  border-radius: 15px;
-  margin-bottom: 1rem;
-  transition: all 0.3s ease;
-  outline: none;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+  height: 56px;
+  padding: 0 1.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.125rem;
   font-weight: 500;
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid transparent;
+  border-radius: 16px;
+  margin-bottom: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  backdrop-filter: blur(10px);
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+#room::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 400;
 }
 
 #room:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+  border-color: var(--electric-purple);
+  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.2);
   transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 #room:disabled {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  color: #6c757d;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
   cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Кнопки */
+/* Основные кнопки с новым дизайном */
 .action-btn {
   width: 100%;
-  padding: 15px 30px;
-  font-size: 18px;
-  font-weight: 700;
-  color: white;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ff9a9e 100%);
+  height: 56px;
+  padding: 0 2rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--white);
+  background: var(--primary-gradient);
   border: none;
-  border-radius: 15px;
+  border-radius: 28px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
   position: relative;
   overflow: hidden;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  text-transform: none;
+  letter-spacing: 0.025em;
+  box-shadow: var(--button-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
+/* Эффекты для основных кнопок */
 .action-btn::before {
   content: '';
   position: absolute;
@@ -171,8 +244,8 @@ h1 {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  transition: left 0.6s;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: left 0.6s ease;
 }
 
 .action-btn:hover::before {
@@ -180,19 +253,21 @@ h1 {
 }
 
 .action-btn:hover:not(:disabled) {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 50%, #ff9a9e 100%);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(168, 85, 247, 0.4);
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #f59e0b 100%);
 }
 
-.action-btn:active {
-  transform: translateY(-1px);
+.action-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  transition: all 0.1s ease;
 }
 
 .action-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.2);
 }
 
 /* Кнопка бота */
@@ -271,29 +346,35 @@ h1 {
   flex-wrap: wrap;
 }
 
+/* Кнопки выбора с glassmorphism */
 .choice-btn {
-  padding: 20px 25px;
-  font-size: 18px;
-  font-weight: 700;
-  color: #333;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
-  border: 4px solid #e1e5e9;
-  border-radius: 20px;
+  width: 80px;
+  height: 80px;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--white);
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 2px solid var(--glass-border);
+  border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
-  min-width: 140px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 0.25rem;
   position: relative;
   overflow: hidden;
-  text-transform: capitalize;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  text-transform: none;
+  letter-spacing: 0.025em;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
+/* Эффекты для кнопок выбора */
 .choice-btn::before {
   content: '';
   position: absolute;
@@ -301,8 +382,8 @@ h1 {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  transition: left 0.6s;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.6s ease;
 }
 
 .choice-btn:hover::before {
@@ -310,21 +391,36 @@ h1 {
 }
 
 .choice-btn:hover:not(:disabled) {
-  border-color: #667eea;
-  transform: translateY(-5px) scale(1.05);
-  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  border-color: var(--electric-purple);
+  transform: translateY(-4px) scale(1.1);
+  box-shadow: 0 16px 40px rgba(168, 85, 247, 0.4);
+  background: var(--primary-gradient);
+  color: var(--white);
 }
 
 .choice-btn:active:not(:disabled) {
-  transform: translateY(-2px) scale(1.02);
+  transform: translateY(-2px) scale(1.05);
+  transition: all 0.1s ease;
 }
 
 .choice-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для эмодзи и текста в кнопках выбора */
+.choice-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.choice-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  margin-top: 0.25rem;
 }
 
 /* Результат */
@@ -347,18 +443,21 @@ h1 {
   text-align: center; /* Центрируем текст */
 }
 
+/* Результаты с новыми цветами */
 .result.success {
-  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 50%, #a3d977 100%);
-  border-color: #28a745;
-  color: #155724;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+  border-color: var(--bright-green);
+  color: var(--white);
   animation: successPulse 0.8s ease-in-out;
+  backdrop-filter: blur(10px);
 }
 
 .result.error {
-  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 50%, #ffb3ba 100%);
-  border-color: #dc3545;
-  color: #721c24;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%);
+  border-color: var(--soft-red);
+  color: var(--white);
   animation: errorPulse 0.8s ease-in-out;
+  backdrop-filter: blur(10px);
 }
 
 @keyframes successPulse {
@@ -1016,12 +1115,45 @@ h1 {
   font-weight: 600;
 }
 
+/* Селектор языка */
+.language-selector {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.lang-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  color: var(--white);
+  border: 2px solid var(--glass-border);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.lang-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.lang-btn.active {
+  background: var(--primary-gradient);
+  border-color: var(--electric-purple);
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+}
+
 /* Кнопки в меню */
 .menu-btn {
   width: 100%;
   padding: 12px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: var(--primary-gradient);
+  color: var(--white);
   border: none;
   border-radius: 12px;
   font-size: 16px;
@@ -1029,7 +1161,7 @@ h1 {
   cursor: pointer;
   transition: all 0.3s ease;
   margin-bottom: 10px;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
 }
 
 .menu-btn:hover {
@@ -1038,12 +1170,95 @@ h1 {
   background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
 }
 
+/* Отображение статистики */
+.stats-display {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 2px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 10px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(5px);
+}
+
+.stat-item:last-child {
+  margin-bottom: 0;
+}
+
+.stat-icon {
+  font-size: 1.2rem;
+  width: 24px;
+  text-align: center;
+}
+
+.stat-label {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--white);
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--electric-purple);
+  text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+}
+
+/* Прогресс-бар для серии побед */
+.streak-progress {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--primary-gradient);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+}
+
+.progress-text {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--white);
+  font-weight: 600;
+}
+
 /* Информационные блоки в меню */
 .menu-info {
-  background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 2px solid var(--glass-border);
   padding: 15px;
   border-radius: 12px;
-  border-left: 4px solid #667eea;
   margin-top: 10px;
 }
 
@@ -1211,6 +1426,61 @@ h1 {
 /* Эффект при наведении на секции меню */
 .menu-section:hover {
   transform: translateX(5px);
+}
+
+/* Стили для уведомлений о достижениях */
+.achievement-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 2px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: var(--glass-shadow);
+  z-index: 10000;
+  transform: translateX(400px);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 300px;
+}
+
+.achievement-notification.show {
+  transform: translateX(0);
+}
+
+.achievement-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.achievement-icon {
+  font-size: 2rem;
+  animation: achievementPulse 2s ease-in-out infinite;
+}
+
+@keyframes achievementPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.achievement-text {
+  flex: 1;
+}
+
+.achievement-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 0.25rem;
+}
+
+.achievement-desc {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.3;
 }
 
 /* Стили для полноэкранного меню на очень маленьких экранах */
@@ -1605,5 +1875,388 @@ h1 {
   
   .status-message .choice-label {
     font-size: 0.75rem;
+  }
+}
+
+/* Install prompt */
+.install-prompt {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.install-prompt.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.install-content {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 2px solid var(--glass-border);
+  border-radius: 24px;
+  box-shadow: var(--glass-shadow);
+  padding: 32px;
+  max-width: 400px;
+  margin: 20px;
+  text-align: center;
+  transform: scale(0.9) translateY(20px);
+  transition: all 0.3s ease;
+}
+
+.install-prompt.show .install-content {
+  transform: scale(1) translateY(0);
+}
+
+.install-icon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.install-content h3 {
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 700;
+  color: var(--white);
+  text-shadow: var(--neon-glow);
+  margin-bottom: 12px;
+}
+
+.install-content p {
+  color: var(--light-gray);
+  margin-bottom: 24px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.install-benefits {
+  margin-bottom: 24px;
+}
+
+.benefit {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  color: var(--white);
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.benefit:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(4px);
+}
+
+.install-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.install-btn {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.install-btn.primary {
+  background: var(--primary-gradient);
+  color: var(--white);
+  box-shadow: var(--button-shadow);
+}
+
+.install-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);
+}
+
+.install-btn.primary:active {
+  transform: translateY(0);
+}
+
+.install-btn.secondary {
+  background: transparent;
+  color: var(--light-gray);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.install-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--white);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive design for install prompt */
+@media (max-width: 768px) {
+  .install-content {
+    padding: 24px;
+    margin: 16px;
+    max-width: 350px;
+  }
+  
+  .install-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+  }
+  
+  .install-content h3 {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+  }
+  
+  .install-content p {
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+  }
+  
+  .benefit {
+    padding: 10px 14px;
+    margin: 6px 0;
+    font-size: 0.9rem;
+  }
+  
+  .install-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .install-btn {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .install-content {
+    padding: 20px;
+    margin: 12px;
+    max-width: 320px;
+  }
+  
+  .install-icon {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+  }
+  
+  .install-content h3 {
+    font-size: 1.3rem;
+    margin-bottom: 6px;
+  }
+  
+  .install-content p {
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+  }
+  
+  .benefit {
+    padding: 8px 12px;
+    margin: 4px 0;
+    font-size: 0.85rem;
+  }
+  
+  .install-btn {
+    padding: 12px 18px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Desktop enhancements */
+@media (min-width: 1024px) {
+  .game-container {
+    max-width: 600px;
+    padding: 3rem;
+  }
+  
+  .choices {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 500px;
+    margin: 2rem auto;
+  }
+  
+  .choice-btn {
+    width: 100px;
+    height: 100px;
+    font-size: 1.2rem;
+  }
+  
+  .choice-emoji {
+    font-size: 2.5rem;
+  }
+  
+  .choice-text {
+    font-size: 0.9rem;
+  }
+  
+  .action-btn {
+    max-width: 300px;
+    padding: 16px 32px;
+    font-size: 1.1rem;
+  }
+  
+  #room {
+    max-width: 300px;
+    padding: 16px 20px;
+    font-size: 1.1rem;
+  }
+  
+  .sidebar-menu {
+    width: 350px;
+  }
+  
+  .menu-section h4 {
+    font-size: 1.1rem;
+  }
+  
+  .stats-display {
+    gap: 1rem;
+  }
+  
+  .stat-item {
+    padding: 12px 16px;
+  }
+  
+  .stat-icon {
+    font-size: 1.5rem;
+  }
+  
+  .stat-label {
+    font-size: 0.95rem;
+  }
+  
+  .stat-value {
+    font-size: 1.1rem;
+  }
+  
+  .install-content {
+    max-width: 500px;
+    padding: 40px;
+  }
+  
+  .install-icon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+  }
+  
+  .install-content h3 {
+    font-size: 2.2rem;
+    margin-bottom: 16px;
+  }
+  
+  .install-content p {
+    font-size: 1.1rem;
+    margin-bottom: 28px;
+  }
+  
+  .benefit {
+    padding: 16px 20px;
+    margin: 10px 0;
+    font-size: 1rem;
+  }
+  
+  .install-actions {
+    flex-direction: row;
+    gap: 16px;
+  }
+  
+  .install-btn {
+    min-width: 140px;
+    padding: 16px 28px;
+    font-size: 1.05rem;
+  }
+}
+
+/* Large desktop screens */
+@media (min-width: 1440px) {
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .game-container {
+    max-width: 700px;
+    padding: 4rem;
+  }
+  
+  h1 {
+    font-size: 3.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .choices {
+    max-width: 600px;
+    gap: 2.5rem;
+    margin: 2.5rem auto;
+  }
+  
+  .choice-btn {
+    width: 120px;
+    height: 120px;
+    font-size: 1.3rem;
+  }
+  
+  .choice-emoji {
+    font-size: 3rem;
+  }
+  
+  .choice-text {
+    font-size: 1rem;
+  }
+  
+  .action-btn {
+    max-width: 350px;
+    padding: 18px 36px;
+    font-size: 1.2rem;
+  }
+  
+  #room {
+    max-width: 350px;
+    padding: 18px 24px;
+    font-size: 1.2rem;
+  }
+  
+  .result {
+    padding: 2rem;
+    margin: 2rem 0;
+  }
+  
+  .status-message {
+    font-size: 1.2rem;
+    line-height: 1.6;
+  }
+  
+  .choices-display {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+  }
+  
+  .choice-icon {
+    font-size: 2rem;
+  }
+  
+  .choice-label {
+    font-size: 1rem;
   }
 }

@@ -63,16 +63,55 @@
   <!-- Боковое меню -->
   <div class="sidebar-menu" id="sidebar-menu">
     <div class="menu-header">
-      <h3>📋 Меню</h3>
+      <h3 data-i18n="menu.title">📋 Меню</h3>
       <button class="close-btn" onclick="closeMenu()">✕</button>
     </div>
     
     <div class="menu-content">
       <div class="menu-section">
-        <h4>🎮 Режимы игры</h4>
+        <h4 data-i18n="menu.language">🌐 Язык</h4>
+        <div class="language-selector">
+          <button class="lang-btn active" data-lang="ru" onclick="changeLanguage('ru')">
+            🇷🇺 Русский
+          </button>
+          <button class="lang-btn" data-lang="en" onclick="changeLanguage('en')">
+            🇺🇸 English
+          </button>
+        </div>
+      </div>
+      
+      <div class="menu-section">
+        <h4 data-i18n="menu.gameModes">🎮 Режимы игры</h4>
         <button id="botMenuButton" onclick="playWithBot(); closeMenu();" class="menu-btn">
-          🤖 Играть с ботом
+          <span data-i18n="menu.playWithBot">🤖 Играть с ботом</span>
         </button>
+      </div>
+      
+      <div class="menu-section">
+        <h4 data-i18n="menu.stats">📊 Статистика</h4>
+        <div class="stats-display">
+          <div class="stat-item">
+            <span class="stat-icon">🏆</span>
+            <span class="stat-label" data-i18n="stats.wins">Победы:</span>
+            <span class="stat-value" id="wins-count">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-icon">🔥</span>
+            <span class="stat-label" data-i18n="stats.streak">Серия:</span>
+            <span class="stat-value" id="streak-count">0</span>
+          </div>
+          <div class="streak-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" id="streak-progress"></div>
+            </div>
+            <div class="progress-text" id="streak-text">0/5</div>
+          </div>
+          <div class="stat-item">
+            <span class="stat-icon">🎮</span>
+            <span class="stat-label" data-i18n="stats.games">Игры:</span>
+            <span class="stat-value" id="games-count">0</span>
+          </div>
+        </div>
       </div>
       
       <div class="menu-section">
@@ -99,13 +138,14 @@
   <div class="menu-overlay" id="menu-overlay" onclick="closeMenu()"></div>
 
   <div class="container">
-    <h1>🎮 Камень, Ножницы, Бумага</h1>
+    <h1 data-i18n="title">🎮 Камень, Ножницы, Бумага</h1>
     
     <div id="game" class="game-container">
       <div class="room-controls">
         <input 
           type="text" 
           id="room" 
+          data-i18n-placeholder="room.placeholder"
           placeholder="Введите ID комнаты (4 цифры)" 
           oninput="updateButton()" 
           maxlength="4"
@@ -113,26 +153,29 @@
           autocomplete="off"
         />
         <button id="actionButton" onclick="handleAction()" class="action-btn">
-          🚀 Создать комнату
+          <span data-i18n="room.create">🚀 Создать комнату</span>
         </button>
       </div>
 
       <div class="choices" id="choices" style="display: none;">
         <div class="game-header">
-          <h3>🎯 Сделайте ваш выбор!</h3>
-          <button class="close-game-btn" onclick="exitGame()" title="Завершить игру" aria-label="Завершить игру">
+          <h3 data-i18n="game.makeChoice">🎯 Сделайте ваш выбор!</h3>
+          <button class="close-game-btn" onclick="exitGame()" data-i18n-title="game.exit" title="Завершить игру" aria-label="Завершить игру">
             ✕
           </button>
         </div>
         <div class="choice-buttons">
-          <button onclick="makeMove('камень')" class="choice-btn" title="Камень побеждает ножницы!">
-            🪨 Камень
+          <button onclick="makeMove('камень')" class="choice-btn" data-i18n-title="choices.rock.title" title="Камень побеждает ножницы!">
+            <span class="choice-emoji">🪨</span>
+            <span class="choice-text" data-i18n="choices.rock">Камень</span>
           </button>
-          <button onclick="makeMove('ножницы')" class="choice-btn" title="Ножницы побеждают бумагу!">
-            ✂️ Ножницы
+          <button onclick="makeMove('ножницы')" class="choice-btn" data-i18n-title="choices.scissors.title" title="Ножницы побеждают бумагу!">
+            <span class="choice-emoji">✂️</span>
+            <span class="choice-text" data-i18n="choices.scissors">Ножницы</span>
           </button>
-          <button onclick="makeMove('бумага')" class="choice-btn" title="Бумага побеждает камень!">
-            📄 Бумага
+          <button onclick="makeMove('бумага')" class="choice-btn" data-i18n-title="choices.paper.title" title="Бумага побеждает камень!">
+            <span class="choice-emoji">📄</span>
+            <span class="choice-text" data-i18n="choices.paper">Бумага</span>
           </button>
         </div>
       </div>
