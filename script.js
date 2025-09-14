@@ -1109,10 +1109,10 @@ function subscribeToUpdates() {
       },
       () => {
         // Показываем уведомление второму игроку, если оппонент завершил игру
-        showStatus(currentLanguage === 'ru' ? 
+        const message = currentLanguage === 'ru' ? 
           "Оппонент завершил игру" :
-          "Opponent ended the game", true);
-        cleanup();
+          "Opponent ended the game";
+        resetLocalStateAndUI(message);
       }
     )
     .subscribe((status) => {
@@ -1130,6 +1130,12 @@ function subscribeToUpdates() {
 // Обработка обновлений игры
 function handleGameUpdate(gameData) {
   const { player1_choice, player2_choice, status, player2_id } = gameData;
+  // Если игра помечена как завершённая — сообщаем и завершаем локально
+  if (status === 'ended') {
+    resetLocalStateAndUI(currentLanguage === 'ru' ? 
+      'Оппонент завершил игру' : 'Opponent ended the game');
+    return;
+  }
 
   console.log('Handling game update:', gameData);
 
@@ -1234,9 +1240,21 @@ function cleanup() {
 
 // Полная очистка при выходе
 async function fullCleanup() {
-  // Удаляем комнату из БД перед очисткой состояния (но не бот-комнату)
+  // Помечаем комнату завершённой (не удаляем запись, чтобы второй игрок получил событие)
   if (gameState.currentRoom && gameState.currentRoom !== BOT_ROOM_ID) {
-    await deleteRoomFromDB();
+    try {
+      await retryWrapper(() =>
+        supabase
+          .from("games")
+          .update({
+            status: 'ended',
+            updated_at: new Date().toISOString()
+          })
+          .eq("room_id", gameState.currentRoom)
+      );
+    } catch (error) {
+      console.error('Ошибка пометки игры как завершённой:', error);
+    }
   } else if (gameState.playingWithBot && gameState.currentRoom === BOT_ROOM_ID) {
     // Для бот-комнаты просто сбрасываем player2
     try {
@@ -1305,8 +1323,11 @@ async function fullCleanup() {
 // Обработка закрытия страницы
 window.addEventListener('beforeunload', (event) => {
   if (gameState.currentRoom) {
-    // Синхронный вызов для удаления комнаты
-    deleteRoomFromDB();
+    // Помечаем игру завершённой, чтобы оппонент получил уведомление
+    navigator.sendBeacon && navigator.sendBeacon(
+      `${supabaseUrl}/rest/v1/games?room_id=eq.${gameState.currentRoom}`,
+      new Blob([JSON.stringify({ status: 'ended', updated_at: new Date().toISOString() })], { type: 'application/json' })
+    );
     cleanup();
   }
 });
@@ -1848,7 +1869,7 @@ async function exitGame() {
   triggerHapticFeedback('light');
   
   try {
-    // Полная очистка состояния
+    // Полная очистка состояния + уведомление оппонента через статус games.ended
     await fullCleanup();
     
     // Сброс состояния игры
@@ -1916,7 +1937,8 @@ function showGameResult(result, myChoice, opponentChoice, opponentName) {
   
   // Определяем иконки для выборов
   const choiceIcons = {
-    'камень': '🪨',
+    // Заменяем на широко поддерживаемый вариант эмодзи камня (fallback)
+    'камень': '🗿',
     'ножницы': '✂️',
     'бумага': '📄'
   };
@@ -1976,4 +1998,50 @@ function showGameResult(result, myChoice, opponentChoice, opponentName) {
   resultElement.style.animation = 'none';
   resultElement.offsetHeight; // Trigger reflow
   resultElement.style.animation = 'resultPulse 0.5s ease-in-out';
+}
+
+/**
+ * Сбрасывает локальное состояние и UI без запросов к БД
+ * Используется, когда оппонент завершил игру
+ * @param {string} message - Сообщение для пользователя
+ */
+function resetLocalStateAndUI(message) {
+  // Отключаем подписки
+  cleanup();
+
+  // Сбрасываем состояние игры
+  gameState.currentRoom = null;
+  gameState.playerId = null;
+  gameState.isPlayer1 = false;
+  gameState.myChoice = null;
+  gameState.opponentChoice = null;
+  gameState.gameStatus = 'idle';
+  gameState.playingWithBot = false;
+
+  // Обновляем UI
+  const choices = document.getElementById('choices');
+  const result = document.getElementById('result');
+  const roomControls = document.querySelector('.room-controls');
+  const roomInput = document.getElementById('room');
+  const actionButton = document.getElementById('actionButton');
+
+  if (choices) choices.style.display = 'none';
+  if (result) {
+    result.innerHTML = '';
+    result.className = 'result';
+  }
+  if (roomControls) roomControls.classList.remove('hidden');
+  if (roomInput) {
+    roomInput.value = '';
+    roomInput.disabled = false;
+  }
+  if (actionButton) {
+    actionButton.style.display = 'block';
+    const buttonText = actionButton.querySelector('span');
+    if (buttonText) buttonText.textContent = t('room.create');
+    actionButton.disabled = false;
+  }
+
+  toggleChoiceButtons(false);
+  showStatus(message);
 }
