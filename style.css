@@ -2089,6 +2089,20 @@ h1 {
     padding: 3rem;
   }
   
+  /* Центровка поля и кнопки в одну строку на desktop */
+  .room-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  /* Кнопка не должна растягиваться на всю ширину на desktop */
+  .action-btn {
+    width: auto;
+    min-width: 180px;
+  }
+  
   .choices {
     grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
