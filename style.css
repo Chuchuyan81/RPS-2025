@@ -28,6 +28,21 @@
   --button-shadow: 0 8px 32px rgba(168, 85, 247, 0.3);
 }
 
+/* === Минималистичный дизайн: карточка игры (переопределения) === */
+/* Причина: привести вид к белой карточке без бликов и плавания, как в новом UI */
+.game-container {
+  background: var(--white);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  backdrop-filter: none;
+  animation: none;
+}
+
+/* Отключаем бегущий блик для карточки в новом дизайне */
+.game-container::before {
+  display: none;
+}
+
 /* Сброс и базовые стили */
 * {
   margin: 0;
