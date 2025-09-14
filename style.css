@@ -992,7 +992,7 @@ h1 {
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 1000;
+  z-index: 11000;
   background: rgba(255, 255, 255, 0.9);
   border: none;
   border-radius: 50%;
