@@ -371,6 +371,12 @@
     document.addEventListener('DOMContentLoaded', () => {
       initWebShare();
       handleShortcuts();
+
+      // Безопасная инициализация обработчика клика для кнопки меню (если inline-обработчик заблокирован CSP)
+      const hamburgerBtn = document.getElementById('hamburger-btn');
+      if (hamburgerBtn && typeof hamburgerBtn.onclick !== 'function') {
+        hamburgerBtn.addEventListener('click', toggleMenu, { passive: true });
+      }
     });
 
     // Функции для меню
@@ -395,7 +401,8 @@
     }
 
     // Обработка установки PWA
-    let deferredPrompt;
+    // Переименовано, чтобы избежать конфликта с той же глобальной переменной в script.js
+    let deferredPromptHtml;
     let installBtn;
     
     // Функция проверки мобильного устройства
@@ -444,7 +451,7 @@
     window.addEventListener('beforeinstallprompt', (e) => {
       console.log('💾 Приложение можно установить (Android/Chrome)');
       e.preventDefault();
-      deferredPrompt = e;
+      deferredPromptHtml = e;
       
       // Показываем кнопку только на мобильных устройствах
       if (isMobileDevice() && installBtn) {
@@ -452,8 +459,8 @@
         installBtn.onclick = async () => {
           installBtn.style.display = 'none';
           try {
-            await deferredPrompt.prompt();
-            const choiceResult = await deferredPrompt.userChoice;
+            await deferredPromptHtml.prompt();
+            const choiceResult = await deferredPromptHtml.userChoice;
             if (choiceResult.outcome === 'accepted') {
               console.log('✅ Пользователь установил приложение');
             } else {
@@ -462,7 +469,7 @@
           } catch (error) {
             console.error('Ошибка при установке:', error);
           }
-          deferredPrompt = null;
+          deferredPromptHtml = null;
         };
       }
     });
