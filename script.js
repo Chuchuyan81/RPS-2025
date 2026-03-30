@@ -1,6 +1,6 @@
 // Правильная инициализация Supabase
-const supabaseUrl = "https://kdbbyqsdmucjvsatbiog.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtkYmJ5cXNkbXVjanZzYXRiaW9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MzQxNzcsImV4cCI6MjA2NjAxMDE3N30.v6wR9s1zCyYL-xN2Rohoi35LJ-f1uA1Y5KPPjQoXhLU";
+const supabaseUrl = "https://cchbitomcbuczxwxjobw.supabase.co";
+const supabaseKey = "sb_publishable_cBZoHPWOyuMvv2byGoDxfw_h1bNou9G";
 
 // Система интернационализации
 const translations = {
@@ -430,10 +430,10 @@ const gameState = {
   achievements: []        // Полученные достижения
 };
 
-// Ждем загрузки Supabase библиотеки
-let supabase = null;
+// Ждем загрузки Supabase библиотеки (имя dbClient — без конфликта с window.supabase из CDN)
+let dbClient = null;
 
-// Делаем supabase доступным глобально для отладки
+// Экземпляр клиента для отладки в консоли
 window.supabaseClient = null;
 
 /**
@@ -441,7 +441,7 @@ window.supabaseClient = null;
  * Выполняет простой запрос для проверки работоспособности
  */
 async function testConnection() {
-  if (!supabase) {
+  if (!dbClient) {
     console.error('Supabase не инициализирован для тестирования');
     showStatus(currentLanguage === 'ru' ? 
       "Ошибка: Supabase не инициализирован" :
@@ -453,7 +453,7 @@ async function testConnection() {
     console.log('🔍 Тестирование подключения к Supabase...');
     
     // Простой запрос для проверки соединения
-    const { data, error } = await supabase
+    const { data, error } = await dbClient
       .from('games')
       .select('count', { count: 'exact', head: true });
     
@@ -617,7 +617,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   try {
     // Правильная инициализация клиента
-    supabase = window.supabase.createClient(supabaseUrl, supabaseKey, {
+    dbClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
       auth: {
         autoRefreshToken: true,
         persistSession: false // Отключаем персистентность для простоты
@@ -630,9 +630,9 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     // Делаем клиент доступным глобально для отладки
-    window.supabaseClient = supabase;
+    window.supabaseClient = dbClient;
     
-    console.log('Supabase client initialized:', supabase);
+    console.log('Supabase client initialized:', dbClient);
     console.log('Глобальная переменная window.supabaseClient доступна для тестирования');
     showStatus(t('status.ready'));
     
@@ -680,7 +680,7 @@ window.addEventListener('DOMContentLoaded', () => {
 async function initializeBotRoom() {
   console.log('🤖 Инициализация бот-комнаты...');
   
-  if (!supabase) {
+  if (!dbClient) {
     console.error('Supabase не доступен для инициализации бот-комнаты');
     return;
   }
@@ -700,7 +700,7 @@ async function initializeBotRoom() {
 async function playWithBot() {
   console.log('🤖 Функция playWithBot вызвана');
   
-  if (!supabase) {
+  if (!dbClient) {
     console.error('Supabase не инициализирован');
     showStatus(currentLanguage === 'ru' ? 
       "Supabase не инициализирован" : 
@@ -729,7 +729,7 @@ async function playWithBot() {
     // Присоединяемся к комнате с ботом
     console.log('🤖 Присоединяемся к бот-комнате...');
     const { data: updatedGame, error: updateError } = await retryWrapper(() =>
-      supabase
+      dbClient
         .from("games")
         .update({ 
           player2_id: gameState.playerId,
@@ -794,7 +794,7 @@ async function ensureBotRoomExists() {
   try {
     // Проверяем существование комнаты с ботом
     const { data: existingRoom, error: selectError } = await retryWrapper(() =>
-      supabase
+      dbClient
         .from("games")
         .select("*")
         .eq("room_id", BOT_ROOM_ID)
@@ -819,7 +819,7 @@ async function ensureBotRoomExists() {
       };
 
       const { data, error } = await retryWrapper(() =>
-        supabase
+        dbClient
           .from("games")
           .insert([gameData])
           .select()
@@ -836,7 +836,7 @@ async function ensureBotRoomExists() {
     } else {
       // Сбрасываем состояние существующей комнаты
       const { error: resetError } = await retryWrapper(() =>
-        supabase
+        dbClient
           .from("games")
           .update({
             player2_id: null,
@@ -874,7 +874,7 @@ async function makeBotMove() {
 
   try {
     const { error } = await retryWrapper(() =>
-      supabase
+      dbClient
         .from("games")
         .update({
           player1_choice: botChoice,
@@ -931,7 +931,7 @@ function toggleChoiceButtons(enabled) {
 
 // Отправка хода
 async function makeMove(choice) {
-  if (!gameState.currentRoom || !supabase) return;
+  if (!gameState.currentRoom || !dbClient) return;
 
   if (gameState.myChoice) {
     showStatus(currentLanguage === 'ru' ? 
@@ -985,7 +985,7 @@ async function makeMove(choice) {
     }
 
     const { error } = await retryWrapper(() =>
-      supabase
+      dbClient
         .from("games")
         .update(updateData)
         .eq("room_id", gameState.currentRoom)
@@ -1038,11 +1038,11 @@ function determineWinner(player1Choice, player2Choice) {
 
 // Сброс раунда
 async function resetRound() {
-  if (!gameState.currentRoom || !supabase) return;
+  if (!gameState.currentRoom || !dbClient) return;
 
   try {
     const { error } = await retryWrapper(() =>
-      supabase
+      dbClient
         .from("games")
         .update({ 
           player1_choice: null, 
@@ -1077,14 +1077,14 @@ async function resetRound() {
 
 // Подписка на обновления
 function subscribeToUpdates() {
-  if (!supabase || !gameState.currentRoom) return;
+  if (!dbClient || !gameState.currentRoom) return;
 
   // Закрываем предыдущие подключения
   cleanup();
 
   console.log('Subscribing to updates for room:', gameState.currentRoom);
 
-  gameState.channel = supabase
+  gameState.channel = dbClient
     .channel(`game-room-${gameState.currentRoom}`)
     .on(
       'postgres_changes',
@@ -1209,13 +1209,13 @@ function handleGameUpdate(gameData) {
 // Очистка ресурсов
 // Удаление комнаты из БД после игры
 async function deleteRoomFromDB() {
-  if (!gameState.currentRoom || !supabase) {
+  if (!gameState.currentRoom || !dbClient) {
     return;
   }
 
   try {
     const { error } = await retryWrapper(() =>
-      supabase
+      dbClient
         .from("games")
         .delete()
         .eq("room_id", gameState.currentRoom)
@@ -1232,8 +1232,8 @@ async function deleteRoomFromDB() {
 }
 
 function cleanup() {
-  if (gameState.channel) {
-    supabase.removeChannel(gameState.channel);
+  if (gameState.channel && dbClient) {
+    dbClient.removeChannel(gameState.channel);
     gameState.channel = null;
   }
 }
@@ -1244,7 +1244,7 @@ async function fullCleanup() {
   if (gameState.currentRoom && gameState.currentRoom !== BOT_ROOM_ID) {
     try {
       await retryWrapper(() =>
-        supabase
+        dbClient
           .from("games")
           .update({
             status: 'ended',
@@ -1259,7 +1259,7 @@ async function fullCleanup() {
     // Для бот-комнаты просто сбрасываем player2
     try {
       await retryWrapper(() =>
-        supabase
+        dbClient
           .from("games")
           .update({
             player2_id: null,
@@ -1675,7 +1675,7 @@ async function handleAction() {
 
 // Создание новой комнаты
 async function createRoom() {
-  if (!supabase) {
+  if (!dbClient) {
     showStatus(currentLanguage === 'ru' ? 
       '😅 Сервис не готов. Попробуйте через секунду! ⏰' :
       '😅 Service not ready. Try again in a second! ⏰', true);
@@ -1700,7 +1700,7 @@ async function createRoom() {
       room_id = Math.floor(1000 + Math.random() * 9000).toString();
       
       // Проверяем уникальность
-      const { data: existingRoom } = await supabase
+      const { data: existingRoom } = await dbClient
         .from('games')
         .select('room_id')
         .eq('room_id', room_id)
@@ -1732,7 +1732,7 @@ async function createRoom() {
       updated_at: new Date().toISOString()
     };
     
-    const { data, error } = await supabase
+    const { data, error } = await dbClient
       .from('games')
       .insert([gameData])
       .select()
@@ -1769,7 +1769,7 @@ async function createRoom() {
 
 // Присоединение к комнате
 async function joinRoom(roomId) {
-  if (!supabase) {
+  if (!dbClient) {
     showStatus(currentLanguage === 'ru' ? 
       '😅 Сервис не готов. Попробуйте через секунду! ⏰' :
       '😅 Service not ready. Try again in a second! ⏰', true);
@@ -1782,7 +1782,7 @@ async function joinRoom(roomId) {
   
   try {
     // Проверяем существование комнаты
-    const { data: room, error: selectError } = await supabase
+    const { data: room, error: selectError } = await dbClient
       .from('games')
       .select('*')
       .eq('room_id', roomId)
@@ -1806,7 +1806,7 @@ async function joinRoom(roomId) {
     gameState.playerId = generatePlayerId();
     gameState.isPlayer1 = false;
     
-    const { data, error } = await supabase
+    const { data, error } = await dbClient
       .from('games')
       .update({
         player2_id: gameState.playerId,
